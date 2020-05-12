@@ -29,6 +29,7 @@
 //This includes
 #include "client.h"
 
+using namespace std;
 
 CClient::CClient()
 	:m_pcPacketData(0)
@@ -351,6 +352,16 @@ void CClient::ReceiveData(char* _pcBufferToReceiveData)
 	}
 }
 
+string convertToString(char* a, int size)
+{
+	int i;
+	string s = "";
+	for (i = 0; i < size; i++) {
+		s = s + a[i];
+	}
+	return s;
+}
+
 void CClient::ProcessData(char* _pcDataReceived)
 {
 
@@ -366,8 +377,34 @@ void CClient::ProcessData(char* _pcDataReceived)
 	}
 	case DATA:
 	{
+		//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		//std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
+
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
-		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
+
+		int length = 0; // Store length of string
+
+		for (int i = 0; i < 50; i++) // Get length of message
+			if (_packetRecvd.MessageContent[i] != char(0))
+				length++;
+			else
+				break;
+
+		// Convert message to string
+		string message = convertToString(_packetRecvd.MessageContent, length);
+		message = message.substr(2, message.length());
+		string username;
+
+		// Split message into username and message
+		std::stringstream ss(message);
+		std::string token;
+		while (std::getline(ss, token, char(200))) {
+			if (username.length() == 0)
+				username.append(token);
+		}
+
+		// Output username and message
+		std::cout << "<" + username + "> " << token << std::endl;
 		break;
 	}
 	default:
