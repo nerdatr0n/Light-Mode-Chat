@@ -220,23 +220,25 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	}
 	case DATA:
 	{
-		//_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
-		//SendData(_packetToSend.PacketData);
+		_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
+		SendData(_packetToSend.PacketData);
 
-		_packetRecvd.MessageContent[10] = 'b';
-		_packetRecvd.MessageContent[11] = 'u';
-		_packetRecvd.MessageContent[12] = 't';
-		_packetRecvd.MessageContent[13] = 't';
+		//std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-		// Sends the message to all the servers
-		for (auto& x : *m_pConnectedClients)
-		{
-			_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
-			SendDataTo(_packetToSend.PacketData, x.second.m_ClientAddress);
+		for (auto& data : *m_pConnectedClients) {
+			std::string str;
+			str.append(data.second.m_strName);
+			str += char(200);
+			str.append(_packetRecvd.MessageContent);
+
+			char* cstr = new char[str.length() + 1];
+			strcpy(cstr, str.c_str());
+
+			_packetToSend.Serialize(DATA, cstr);
+			SendDataTo(_packetToSend.PacketData, data.second.m_ClientAddress);
+
+			delete[] cstr;
 		}
-
-		//_packetToSend.Serialize(DATA, "TEST MESSAGE");
-		//SendData(_packetToSend.PacketData);
 
 		break;
 	}
