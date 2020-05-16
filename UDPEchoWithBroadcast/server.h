@@ -78,6 +78,8 @@ private:
 
 	//A workQueue to distribute messages between the main thread and Receive thread.
 	CWorkQueue<std::pair<sockaddr_in, std::string>>* m_pWorkQueue;
+
+	std::thread KeepAlive;
 };
 
 #endif

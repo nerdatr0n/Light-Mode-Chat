@@ -71,6 +71,7 @@ bool CServer::Initialise()
 	//Qs 2: Create the map to hold details of all connected clients
 	m_pConnectedClients = new std::map < std::string, TClientDetails >() ;
 
+	
 	return true;
 }
 
@@ -211,10 +212,13 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	{
 	case HANDSHAKE:
 	{
-		std::string message = "Users in chatroom : ";
+		std::string message = to_string(m_pConnectedClients->size() + 1) + "Users in chatroom : ";
 		std::cout << "Server received a handshake message " << std::endl;
 		if (AddClient(_packetRecvd.MessageContent))
 		{
+			for (auto& x : *m_pConnectedClients) {
+				message += x.second.m_strName;
+			}
 			//Qs 3: To DO : Add the code to do a handshake here
 			_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
 			SendDataTo(_packetToSend.PacketData, dataItem.first);
@@ -279,7 +283,11 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 		SendData(_packetToSend.PacketData);
 		break;
 	}
-
+	case KEEPALIVE: {
+		std::cout << "Kept Alive" << std::endl;
+		_packetToSend.Serialize(KEEPALIVE, "Kept Alive");
+		SendData(_packetToSend.PacketData);
+	}
 	default:
 		break;
 
