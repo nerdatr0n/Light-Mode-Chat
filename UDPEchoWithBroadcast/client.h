@@ -46,6 +46,8 @@ public:
 	virtual void GetRemoteIPAddress(char* _pcSendersIP);
 	virtual unsigned short GetRemotePort();
 
+	void keepAlive();
+
 	void GetPacketData(char* _pcLocalBuffer);
 	CWorkQueue<std::string>* GetWorkQueue();
 
@@ -55,6 +57,11 @@ public:
 private:
 	// Question 7 : Broadcast to Detect Servers
 	void ReceiveBroadcastMessages(char* _pcBufferToReceiveData);
+
+	int m_iConnectedTimer = 30;
+	int m_iConnectedTimerMax = 30;
+	int m_bConnected = false;
+	std::string m_sQuitMessage;
 
 private:
 	//A buffer to contain all packet data for the client

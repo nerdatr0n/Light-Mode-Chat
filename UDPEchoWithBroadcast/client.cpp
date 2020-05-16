@@ -191,9 +191,14 @@ bool CClient::Initialise()
 		gets_s(_cUserName);
 	} while (_cUserName[0] == 0);
 
+	strcpy(m_cUserName, _cUserName);
+
 	TPacket _packet;
 	_packet.Serialize(HANDSHAKE, _cUserName); 
 	SendData(_packet.PacketData);
+
+	m_bConnected = true;
+
 	return true;
 }
 
@@ -278,8 +283,24 @@ void CClient::ReceiveBroadcastMessages(char* _pcBufferToReceiveData)
 
 bool CClient::SendData(char* _pcDataToSend)
 {
+	//_pcDataToSend[strlen(_pcDataToSend)] = char(200);
+
+	char delimiter[2];
+	ZeroMemory(&delimiter, 2);
+	delimiter[0] = char(200);
+
+	if (this->m_cUserName[0] != char(0) && _pcDataToSend[0] != '0')
+	{
+		//strcat(_pcDataToSend, delimiter);
+		//_pcDataToSend[strlen(_pcDataToSend)-1] = char(200);
+
+		strcat(_pcDataToSend, delimiter);
+		strcat(_pcDataToSend, this->m_cUserName);
+	}
+
 	int _iBytesToSend = (int)strlen(_pcDataToSend) + 1;
-	
+
+
 	char _RemoteIP[MAX_ADDRESS_LENGTH];
 	inet_ntop(AF_INET, &m_ServerSocketAddress.sin_addr, _RemoteIP, sizeof(_RemoteIP));
 	//std::cout << "Trying to send " << _pcDataToSend << " to " << _RemoteIP << ":" << ntohs(m_ServerSocketAddress.sin_port) << std::endl;
@@ -287,13 +308,13 @@ bool CClient::SendData(char* _pcDataToSend)
 	strcpy_s(_message, strlen(_pcDataToSend) + 1, _pcDataToSend);
 
 	int iNumBytes = sendto(
-		m_pClientSocket->GetSocketHandle(),				// socket to send through.
-		_pcDataToSend,									// data to send
-		_iBytesToSend,									// number of bytes to send
-		0,												// flags
-		reinterpret_cast<sockaddr*>(&m_ServerSocketAddress),	// address to be filled with packet target
-		sizeof(m_ServerSocketAddress)							// size of the above address struct.
-		);
+		m_pClientSocket->GetSocketHandle(),                // socket to send through.
+		_pcDataToSend,                                    // data to send
+		_iBytesToSend,                                    // number of bytes to send
+		0,                                                // flags
+		reinterpret_cast<sockaddr*>(&m_ServerSocketAddress),    // address to be filled with packet target
+		sizeof(m_ServerSocketAddress)                            // size of the above address struct.
+	);
 	//iNumBytes;
 	if (_iBytesToSend != iNumBytes)
 	{
@@ -352,15 +373,6 @@ void CClient::ReceiveData(char* _pcBufferToReceiveData)
 	}
 }
 
-string convertToString(char* a, int size)
-{
-	int i;
-	string s = "";
-	for (i = 0; i < size; i++) {
-		s = s + a[i];
-	}
-	return s;
-}
 
 void CClient::ProcessData(char* _pcDataReceived)
 {
@@ -377,9 +389,6 @@ void CClient::ProcessData(char* _pcDataReceived)
 	}
 	case DATA:
 	{
-		//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
-		//std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
-
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
 
 		int length = 0; // Store length of string
@@ -392,12 +401,12 @@ void CClient::ProcessData(char* _pcDataReceived)
 
 		// Convert message to string
 		string message = convertToString(_packetRecvd.MessageContent, length);
-		message = message.substr(2, message.length());
+		message = message.substr(1, message.length());
 		string username;
 
 		// Split message into username and message
-		std::stringstream ss(message);
-		std::string token;
+		stringstream ss(message);
+		string token;
 		while (std::getline(ss, token, char(200))) {
 			if (username.length() == 0)
 				username.append(token);
@@ -405,6 +414,11 @@ void CClient::ProcessData(char* _pcDataReceived)
 
 		// Output username and message
 		std::cout << "<" + username + "> " << token << std::endl;
+		break;
+	}
+	case KEEPALIVE:
+	{
+		keepAlive();
 		break;
 	}
 	default:
@@ -432,4 +446,27 @@ void CClient::GetPacketData(char* _pcLocalBuffer)
 CWorkQueue<std::string>* CClient::GetWorkQueue()
 {
 	return m_pWorkQueue;
+}
+
+// Client version of keepalive - if the client doesn't recieve a packet from the server, it will disconnect
+void CClient::keepAlive()
+{
+
+	while (m_iConnectedTimer > 0 && m_bOnline == true)
+	{
+		// Loop while timer is still above 0: Timer gets reset if a packet is recieved
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+		m_iConnectedTimer--;
+
+		if (!m_bOnline)
+			break;
+	}
+
+	if (m_bOnline)
+	{
+		m_bOnline = false;
+		m_bConnected = false;
+		m_iConnectedTimer = m_iConnectedTimerMax;
+		m_sQuitMessage = "\nConnection to server dropped! Restarting...\n\n\n\n\n";
+	}
 }

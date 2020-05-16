@@ -13,7 +13,7 @@
 #include <utility>
 #include <thread>
 #include <chrono>
-
+#include <string>
 
 //Local Includes
 #include "utils.h"
@@ -24,6 +24,8 @@
 
 //Local Includes
 #include "server.h"
+
+using namespace std;
 
 CServer::CServer()
 	:m_pcPacketData(0),
@@ -199,6 +201,7 @@ unsigned short CServer::GetRemotePort()
 	return ntohs(m_ClientAddress.sin_port);
 }
 
+
 void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 {
 	TPacket _packetRecvd, _packetToSend;
@@ -220,16 +223,37 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	}
 	case DATA:
 	{
-		_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
-		SendData(_packetToSend.PacketData);
+		/*    _packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
+		SendData(_packetToSend.PacketData);*/
 
 		//std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
 		for (auto& data : *m_pConnectedClients) {
-			std::string str;
-			str.append(data.second.m_strName);
+
+			int length = 0; // Store length of string
+
+			for (int i = 0; i < 50; i++) // Get length of message
+				if (_packetRecvd.MessageContent[i] != char(0))
+					length++;
+				else
+					break;
+
+			// Convert message to string
+			string message = convertToString(_packetRecvd.MessageContent, length);
+			string username;
+
+			// Split message into username and message
+			stringstream ss(message);
+			string token;
+			while (std::getline(ss, token, char(200))) {
+				if (username.length() == 0)
+					username.append(token);
+			}
+			// Construct one string to send it packet
+			string str;
+			str.append(token);
 			str += char(200);
-			str.append(_packetRecvd.MessageContent);
+			str.append(username.substr(1, username.length()));
 
 			char* cstr = new char[str.length() + 1];
 			strcpy(cstr, str.c_str());
@@ -239,6 +263,10 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 
 			delete[] cstr;
 		}
+
+
+		//_packetToSend.Serialize(DATA, _packetRecvd.MessageContent);
+		//SendData(_packetToSend.PacketData);
 
 		break;
 	}
