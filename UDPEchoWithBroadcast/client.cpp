@@ -41,6 +41,7 @@ CClient::CClient()
 	m_pcPacketData = new char[MAX_MESSAGE_LENGTH];
 	ZeroMemory(m_pcPacketData, MAX_MESSAGE_LENGTH);
 
+	m_bSucsessfullHandshake = false;
 }
 
 CClient::~CClient()
@@ -87,7 +88,7 @@ bool CClient::Initialise()
 
 	//Create a socket object
 	m_pClientSocket = new CSocket();
-	
+
 	//Get the port number to bind the socket to
 	unsigned short _usClientPort = QueryPortNumber(DEFAULT_CLIENT_PORT);
 	//Initialise the socket to the port number
@@ -185,20 +186,40 @@ bool CClient::Initialise()
 
 	//Send a hanshake message to the server as part of the Client's Initialization process.
 	//Step1: Create a handshake packet
-	
-	do{
+
+	do
+	{
 		std::cout << "Please enter a username : ";
 		gets_s(_cUserName);
 	} while (_cUserName[0] == 0);
 
 	strcpy(m_cUserName, _cUserName);
 
+
 	TPacket _packet;
-	_packet.Serialize(HANDSHAKE, _cUserName); 
+	_packet.Serialize(HANDSHAKE, _cUserName);
 	SendData(_packet.PacketData);
 
-	m_bConnected = true;
 
+	//while (!m_bSucsessfullHandshake)
+	//{
+	//	do
+	//	{
+	//		std::cout << "That username is already taken" << std::endl;
+	//		std::cout << "Please enter a username : ";
+	//		gets_s(_cUserName);
+	//	} while (_cUserName[0] == 0);
+	//
+	//	strcpy(m_cUserName, _cUserName);
+	//
+	//
+	//	TPacket _packet;
+	//	_packet.Serialize(HANDSHAKE, _cUserName);
+	//	SendData(_packet.PacketData);
+	//}
+
+	m_bConnected = true;
+	
 	return true;
 }
 
@@ -383,6 +404,7 @@ void CClient::ProcessData(char* _pcDataReceived)
 	{
 	case HANDSHAKE_SUCCESS:
 	{
+		m_bSucsessfullHandshake = true;
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
 		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
 		break;
@@ -407,9 +429,18 @@ void CClient::ProcessData(char* _pcDataReceived)
 		// Split message into username and message
 		stringstream ss(message);
 		string token;
-		while (std::getline(ss, token, char(200))) {
+		while (std::getline(ss, token, char(200)))
+		{
 			if (username.length() == 0)
+			{
 				username.append(token);
+			}
+		}
+
+		// Wont display it if its from itself
+		if (username == m_cUserName)
+		{
+			break;
 		}
 
 		// Output username and message

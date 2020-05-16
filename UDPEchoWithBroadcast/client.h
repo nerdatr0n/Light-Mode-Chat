@@ -79,6 +79,7 @@ private:
 	//A vector to hold all the servers found after broadcasting
 	std::vector<sockaddr_in> m_vecServerAddr;
 	bool m_bDoBroadcast;
+	bool m_bSucsessfullHandshake;
 };
 
 #endif

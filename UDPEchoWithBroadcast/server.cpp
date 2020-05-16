@@ -212,6 +212,17 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	{
 	case HANDSHAKE:
 	{
+		for (auto& i : *m_pConnectedClients)
+		{
+			if (_packetRecvd.MessageContent == i.second.m_strName)
+			{
+				std::cout << "Client request existing name" << std::endl;
+				_packetToSend.Serialize(HANDSHAKE, const_cast<char*>("That Username Allready exists"));
+				SendDataTo(_packetToSend.PacketData, dataItem.first);
+				exit;
+			}
+		}
+
 		std::string message = to_string(m_pConnectedClients->size() + 1) + "Users in chatroom : ";
 		std::cout << "Server received a handshake message " << std::endl;
 		if (AddClient(_packetRecvd.MessageContent))
