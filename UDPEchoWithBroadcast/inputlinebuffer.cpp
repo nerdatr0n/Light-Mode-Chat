@@ -8,8 +8,8 @@
 //
 // File Name	: 
 // Description	: Input text into a buffer without stalling in a Win32 console window.
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: Braden Cleur, David Haverland
+// Mail			: braden.cle8463@mediadesign.school.nz, david.hav8466@mediadesign.school.nz
 //
 
 //Library Includes
@@ -123,7 +123,7 @@ void CInputLineBuffer::PrintToScreenTop(void)
 
 	COORD coord = { 0, 0 };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 2);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 242);
 	std::cout << m_pBuffer;
 	const int iExtraToClearLine = BufInfo.dwSize.X - (m_uBufferPos%BufInfo.dwSize.X);
 	for (int i = 0; i<iExtraToClearLine; i++)

@@ -3,8 +3,8 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: Braden Cleur, David Haverland
+// Mail			: braden.cle8463@mediadesign.school.nz, david.hav8466@mediadesign.school.nz
 //
 
 //Library Includes
@@ -231,7 +231,7 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 			break;
 		}
 
-		std::string message = to_string(m_pConnectedClients->size() + 1) + "Users in chatroom : ";
+		std::string message = to_string(m_pConnectedClients->size() + 1) + " Users in chatroom : ";
 		std::cout << "Server received a handshake message " << std::endl;
 		if (AddClient(_packetRecvd.MessageContent))
 		{

@@ -8,8 +8,8 @@
 //
 // File Name	: 
 // Description	: 
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: Braden Cleur, David Haverland
+// Mail			: braden.cle8463@mediadesign.school.nz, david.hav8466@mediadesign.school.nz
 //
 
 //Library Includes
@@ -387,36 +387,37 @@ void CClient::ProcessData(char* _pcDataReceived)
 	case HANDSHAKE_SUCCESS:
 	{
 		m_bSucsessfullHandshake = true;
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 242);
 		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
 		break;
 	}
 	case HANDSHAKE_FAIL:
 	{
-		char _cUsername[50];
+		char _cUserName[50];
 		ZeroMemory(&m_cUserName, strlen(m_cUserName));
 
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 242);
 		
 		do
 		{
 			std::cout << "That username is already taken" << std::endl;
 			std::cout << "Please enter a username : ";
-			gets_s(_cUsername);
-		} while (_cUsername[0] == 0);
+			gets_s(_cUserName);
+		} while (_cUserName[0] == 0);
 		
-		strcpy(_cUsername, _cUsername);
-		
-		
+		strcpy(m_cUserName, _cUserName);
+
+		m_bConnected = true;
+
 		TPacket _packet;
-		_packet.Serialize(HANDSHAKE, _cUsername);
+		_packet.Serialize(HANDSHAKE, _cUserName);
 		SendData(_packet.PacketData);
 		
 		break;
 	}
 	case DATA:
 	{
-		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 242);
 
 		int length = 0; // Store length of string
 

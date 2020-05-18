@@ -8,8 +8,8 @@
 //
 // File Name	: 
 // Description	: Input text into a buffer without stalling in a Win32 console window.
-// Author		: Your Name
-// Mail			: your.name@mediadesign.school.nz
+// Author		: Braden Cleur, David Haverland
+// Mail			: braden.cle8463@mediadesign.school.nz, david.hav8466@mediadesign.school.nz
 //
 
 #ifndef __INPUTLINEBUFFER_H__
