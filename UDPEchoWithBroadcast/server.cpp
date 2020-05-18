@@ -225,7 +225,7 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 				break;
 			}
 		}
-
+		// For failed handshake
 		if (!bIsDifferentName)
 		{
 			break;
@@ -242,6 +242,21 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 			_packetToSend.Serialize(HANDSHAKE_SUCCESS, const_cast<char*>(message.c_str()));
 			SendDataTo(_packetToSend.PacketData, dataItem.first);
 		}
+
+
+		string token;
+		std::string sJoinMessage = _packetRecvd.MessageContent;
+		sJoinMessage += " has joined the chat";
+
+		for (auto& i : *m_pConnectedClients)
+		{
+			if (i.second.m_strName != _packetRecvd.MessageContent)
+			{
+				_packetToSend.Serialize(DATA, const_cast<char*>(sJoinMessage.c_str()));
+				SendDataTo(_packetToSend.PacketData, i.second.m_ClientAddress);
+			}
+		}
+
 		break;
 	}
 	case DATA:
