@@ -200,24 +200,6 @@ bool CClient::Initialise()
 	_packet.Serialize(HANDSHAKE, _cUserName);
 	SendData(_packet.PacketData);
 
-
-	//while (!m_bSucsessfullHandshake)
-	//{
-	//	do
-	//	{
-	//		std::cout << "That username is already taken" << std::endl;
-	//		std::cout << "Please enter a username : ";
-	//		gets_s(_cUserName);
-	//	} while (_cUserName[0] == 0);
-	//
-	//	strcpy(m_cUserName, _cUserName);
-	//
-	//
-	//	TPacket _packet;
-	//	_packet.Serialize(HANDSHAKE, _cUserName);
-	//	SendData(_packet.PacketData);
-	//}
-
 	m_bConnected = true;
 	
 	return true;
@@ -407,6 +389,29 @@ void CClient::ProcessData(char* _pcDataReceived)
 		m_bSucsessfullHandshake = true;
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
 		std::cout << "SERVER> " << _packetRecvd.MessageContent << std::endl;
+		break;
+	}
+	case HANDSHAKE_FAIL:
+	{
+		char _cUsername[50];
+		ZeroMemory(&m_cUserName, strlen(m_cUserName));
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 10);
+		
+		do
+		{
+			std::cout << "That username is already taken" << std::endl;
+			std::cout << "Please enter a username : ";
+			gets_s(_cUsername);
+		} while (_cUsername[0] == 0);
+		
+		strcpy(_cUsername, _cUsername);
+		
+		
+		TPacket _packet;
+		_packet.Serialize(HANDSHAKE, _cUsername);
+		SendData(_packet.PacketData);
+		
 		break;
 	}
 	case DATA:

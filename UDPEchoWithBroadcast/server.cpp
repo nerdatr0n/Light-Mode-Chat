@@ -212,15 +212,23 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 	{
 	case HANDSHAKE:
 	{
+		
+		bool bIsDifferentName = true;
 		for (auto& i : *m_pConnectedClients)
 		{
 			if (_packetRecvd.MessageContent == i.second.m_strName)
 			{
 				std::cout << "Client request existing name" << std::endl;
-				_packetToSend.Serialize(HANDSHAKE, const_cast<char*>("That Username Allready exists"));
+				_packetToSend.Serialize(HANDSHAKE_FAIL, const_cast<char*>("That Username Allready exists"));
 				SendDataTo(_packetToSend.PacketData, dataItem.first);
-				exit;
+				bIsDifferentName = false;
+				break;
 			}
+		}
+
+		if (!bIsDifferentName)
+		{
+			break;
 		}
 
 		std::string message = to_string(m_pConnectedClients->size() + 1) + "Users in chatroom : ";
@@ -294,10 +302,15 @@ void CServer::ProcessData(std::pair<sockaddr_in, std::string> dataItem)
 		SendData(_packetToSend.PacketData);
 		break;
 	}
-	case KEEPALIVE: {
+	case KEEPALIVE:
+	{
 		std::cout << "Kept Alive" << std::endl;
 		_packetToSend.Serialize(KEEPALIVE, "Kept Alive");
 		SendData(_packetToSend.PacketData);
+	}
+	case COMMAND:
+	{
+
 	}
 	default:
 		break;

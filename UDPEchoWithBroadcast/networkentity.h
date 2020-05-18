@@ -22,6 +22,7 @@ enum EMessageType : unsigned char
 {
 	HANDSHAKE,
 	HANDSHAKE_SUCCESS,
+	HANDSHAKE_FAIL,
 	DATA,
 	KEEPALIVE,
 	COMMAND,

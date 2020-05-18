@@ -17,6 +17,9 @@
 #include <cassert>
 //#include <vld.h>
 #include <thread>
+#include <iostream>
+#include <chrono>
+#include <ctime>    
 
 //Local Includes
 #include "consoletools.h"
@@ -54,6 +57,8 @@ int main()
 	CClient* _pClient = nullptr;
 	//A pointer to hold a server instance
 	CServer* _pServer = nullptr;
+
+	auto  aTimeOfAwakeCheck = std::chrono::system_clock::now();
 
 	// query, is this to be a client or a server?
 	_ucChoice = QueryOption("Do you want to run a client or server (C/S)?", "CS");
@@ -96,6 +101,7 @@ int main()
 	else if (_eNetworkEntityType == SERVER) //if network entity is a server
 	{
 
+
 		_pServer = static_cast<CServer*>(_rNetwork.GetInstance().GetNetworkEntity());
 		_ServerReceiveThread = std::thread(&CServer::ReceiveData, _pServer, std::ref(_pcPacketData));
 
@@ -103,6 +109,7 @@ int main()
 
 	while (_rNetwork.IsOnline())
 	{
+
 		if (_eNetworkEntityType == CLIENT) //if network entity is a client
 		{
 			_pClient = static_cast<CClient*>(_rNetwork.GetInstance().GetNetworkEntity());
@@ -144,6 +151,14 @@ int main()
 		}
 		else //if you are running a server instance
 		{
+			//auto aCurrentTime = std::chrono::system_clock::now();
+			//std::chrono::duration<double>dTimeBetweenChecks(5);
+			//if (aTimeOfAwakeCheck - aCurrentTime > dTimeBetweenChecks)
+			//{
+			//	aTimeOfAwakeCheck = aCurrentTime;
+			//
+			//}
+
 
 			if (_pServer != nullptr)
 			{
